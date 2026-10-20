@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL AUTO · Liquid Glass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/lightweight-charts.js"></script>
+</head>
+<body class="theme-dark density-compact">
+  <!-- REFLEJOS DE LUZ AMBIENTAL SUTIL PARA REFRACCIÓN LIQUID GLASS SOBRE NEGRO PURO -->
+  <div class="ambient-canvas" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <!-- BARRA FLOTANTE iOS LIQUID GLASS -->
+  <header class="topbar glass-bar">
+    <div class="brand">
+      <div class="brand-logo">SL</div>
+      <div class="brand-text">
+        <div class="brand-title">SL AUTO</div>
+        <div class="brand-meta">
+          <span class="live-pill"><span class="dot"></span> En vivo</span>
+          <span class="meta-item">2L + 2S</span>
+          <span class="meta-item" id="lastUpdateTxt">--</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-tabs glass-pill-dock" id="mainTabs">
+      <button class="nav-btn active" data-tab="tab-detalle">Explorador &amp; Curvas</button>
+      <button class="nav-btn" data-tab="tab-estrategias">Estrategias</button>
+      <button class="nav-btn" data-tab="tab-forward">Bybit Live</button>
+    </nav>
+
+    <div class="top-actions">
+      <button id="btnThemeToggle" class="theme-switch glass-btn" title="Cambiar Dark / Light Mode">
+        <span class="theme-icon icon-moon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+        <span class="theme-icon icon-sun">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </span>
+        <span id="lblThemeMode" class="theme-label">Dark</span>
+      </button>
+
+      <button id="btnMobileLink" class="action-btn glass-btn" title="Copiar link para ver desde celular con datos 4G/5G" style="display:none; color: #30d158; border-color: rgba(48, 209, 88, 0.35);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <span id="lblMobile">📱 Celular</span>
+      </button>
+
+      <button id="btnSyncSheets" class="action-btn action-sync" title="Sincronizar con Google Sheets">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        <span>Sync</span>
+      </button>
+
+      <a id="linkSheets" href="https://docs.google.com/spreadsheets/d/1LA62DNDVUce5e5772OiQlWOJZPvr4R6QYE8DMrUlDJU/edit" target="_blank" rel="noopener" class="action-btn glass-btn" title="Abrir Google Sheets">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- 01. EXPLORADOR & CURVAS PNL UNIFICADOS (GRÁFICO ARRIBA + EXPLORADOR ABAJO) -->
+    <section id="tab-detalle" class="tab-panel active">
+      <!-- CABECERA COMPACTA DEL GRÁFICO: CURVAS ACTIVAS + PRESETS -->
+      <div class="curves-top-strip">
+        <div class="active-curves-bar" id="selectedCurvesBar"></div>
+        <div class="preset-group" id="curvePresets">
+          <button class="chip" data-preset="ganadoras_a">Ganadoras</button>
+          <button class="chip" data-preset="machos">Machos</button>
+          <button class="chip" data-preset="oraculo">Oráculo</button>
+          <button class="chip" data-preset="slauto">SL AUTO vs Calc</button>
+        </div>
+      </div>
+
+      <!-- GRÁFICO ARRIBA -->
+      <div class="chart-box glass-panel" style="margin-bottom: 14px;">
+        <div class="chart-hud" id="chartHud">
+          <div class="hud-step">Avance <strong id="hudStep">--</strong></div>
+          <div class="hud-series" id="hudSeries"></div>
+        </div>
+        <div id="tvChartContainer" class="tv-chart-view"></div>
+      </div>
+
+      <!-- BARRA DE FILTROS DEL EXPLORADOR -->
+      <div class="filter-bar glass-panel">
+        <div class="search-box">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar..." autocomplete="off" />
+          <button id="btnSearchClear" class="search-clear hidden">✕</button>
+        </div>
+
+        <div class="filter-controls">
+          <div class="dropdown-wrap">
+            <button class="dropdown-trigger" id="btnFilterEstrategia">
+              <span>Estrategia: <strong id="lblFilterEstrategia">Todas</strong></span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu glass-popover" id="menuFilterEstrategia"></div>
+          </div>
+
+          <div class="dropdown-wrap">
+            <button class="dropdown-trigger" id="btnFilterSL">
+              <span>SL: <strong id="lblFilterSL">Todos</strong></span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu glass-popover" id="menuFilterSL"></div>
+          </div>
+
+          <div class="dropdown-wrap">
+            <button class="dropdown-trigger" id="btnFilterTP">
+              <span>TP: <strong id="lblFilterTP">Todos</strong></span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu glass-popover" id="menuFilterTP"></div>
+          </div>
+
+          <div class="segmented-control" id="controlFilterModo">
+            <button class="seg-btn active" data-modo="ALL">Todos</button>
+            <button class="seg-btn" data-modo="A (2L+2S)">Modo A</button>
+            <button class="seg-btn" data-modo="C (1L+1S)">Modo C</button>
+            <button class="seg-btn" data-modo="sin tope">Libre</button>
+          </div>
+
+          <div class="filter-meta">
+            <span id="countBadge" class="count-tag">0</span>
+            <button id="btnResetFilters" class="btn-icon" title="Resetear filtros">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA EXPLORADOR ABAJO (CON BOTÓN DE LÁPIZ EN ESQUINA SUPERIOR IZQUIERDA) -->
+      <div class="table-wrapper-relative">
+        <!-- POPOVER DE COLUMNAS Y MÉTRICAS QUANT (SE ABRE DESDE EL LÁPIZ EN LA 1ª COLUMNA) -->
+        <div id="columnsPopover" class="glass-popover columns-editor-popover hidden">
+          <div class="col-pop-header">
+            <span>Columnas &amp; Orden</span>
+            <label class="quant-inline-toggle" title="Mostrar Profit Factor, Sharpe, Sortino y Calmar">
+              <span>Quant</span>
+              <span class="switch switch-sm">
+                <input type="checkbox" id="chkShowQuantMetrics" />
+                <span class="slider"></span>
+              </span>
+            </label>
+          </div>
+          <div class="col-pop-hint">Tildá para mostrar/ocultar o arrastrá / usá ↑↓ para mover</div>
+          <div id="cfgColumnsList" class="col-order-list"></div>
+        </div>
+
+        <div class="table-container glass-panel">
+          <table class="quant-table" id="detalleTable">
+            <thead>
+              <tr id="tableHeaderRow"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02. ESTRATEGIAS (CON RESÚMENES ARRIBA, TARJETAS EXPANDIBLES Y NOTAS DE VARIANTES) -->
+    <section id="tab-estrategias" class="tab-panel">
+      <!-- RECTÁNGULOS RESÚMENES ARRIBA DE ESTRATEGIAS -->
+      <div class="kpi-strip" id="kpiGrid"></div>
+
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <h2>Estrategias</h2>
+        </div>
+        <div class="segmented-control" id="pillsTop3Modo">
+          <button class="seg-btn active" data-modo="ALL">Todos</button>
+          <button class="seg-btn" data-modo="A (2L+2S)">Modo A</button>
+          <button class="seg-btn" data-modo="C (1L+1S)">Modo C</button>
+          <button class="seg-btn" data-modo="sin tope">Libre</button>
+        </div>
+      </div>
+
+      <div class="cards-grid" id="top3Grid"></div>
+    </section>
+
+    <!-- 03. BYBIT LIVE (FORWARD VS BACKTEST & JOURNAL) -->
+    <section id="tab-forward" class="tab-panel">
+      <!-- ESTADÍSTICA REAL ARRIBA DE TODO POR ESTRATEGIA -->
+      <div class="kpi-strip" id="fvbStatsStrip"></div>
+
+      <!-- ESTADO DE LOS 3 BOTS EN VIVO -->
+      <div class="bots-status-row" id="botsGrid"></div>
+
+      <!-- JOURNAL DE TRADES EN VIVO -->
+      <div class="fvb-panel glass-panel">
+        <div class="fvb-header">
+          <div class="segmented-control" id="fvbClassControl">
+            <button class="seg-btn active" id="btnShowConformes">Conformes</button>
+            <button class="seg-btn" id="btnShowExcluidos">Excluidas</button>
+            <button class="seg-btn" id="btnShowTodos">Todos</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <select id="selFvbPeriodo" class="dropdown-trigger" style="height: 28px; padding: 0 8px; outline: none; border-radius: 999px;">
+              <option value="14oct">En vivo verificado (14/10 a hoy)</option>
+              <option value="oct">Mes de Octubre</option>
+              <option value="ALL">Todo el Historial</option>
+            </select>
+            <select id="selFvbEstrategia" class="dropdown-trigger" style="height: 28px; padding: 0 8px; outline: none; border-radius: 999px;">
+              <option value="ALL">Todas las cuentas</option>
+              <option value="principal">SL AUTO (Principal)</option>
+              <option value="macho">Machos BB+RSI</option>
+              <option value="oraculo">Oráculo 2 a 1</option>
+            </select>
+            <span class="count-tag" id="fvbTradesCount">0</span>
+          </div>
+        </div>
+        <div class="table-container fvb-table-wrap">
+          <table class="quant-table" id="fvbTradesTable">
+            <thead id="fvbTradesHead"></thead>
+            <tbody id="fvbTradesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
